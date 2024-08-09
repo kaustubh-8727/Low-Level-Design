@@ -24,7 +24,7 @@ class Vehicle {
             "company : "+ vehicleCompanyName + "\n" +
             "model : " + model + "\n" +
             "color : " + color + "\n" +
-            "FuelEfficiency : " + "\n" +
+            "FuelEfficiency : " + FuelEfficiency + "\n" +
             "price : " + price + "\n" +
             "VIN : " + VIN + "\n"
         );
