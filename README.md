@@ -9,7 +9,6 @@ A comprehensive collection of Low-Level Designs for various real-world applicati
 * Decorator Design Pattern: Low-Level Design for Coffee/Tea Ordering with Add-ons.
 * Visitor Design Pattern: Low-Level Design for an E-Commerce System, including functionalities like adding promotional discounts, tax calculations, and shipping cost calculations for various product categories.
 * Chain of Responsibility Design Pattern: Low-Level Design for a Logger System in Java.
+* Builder Design Pattern: Low-Level Design for Assembling Vehicles ( create different types of vehicles (like a car, truck) that share common components)
 
-
-
-  (and many other design patterns are added.)
+(and many other design patterns are added.)
