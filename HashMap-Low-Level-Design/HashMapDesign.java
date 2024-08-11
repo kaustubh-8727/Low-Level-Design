@@ -80,19 +80,19 @@ public class HashMapDesign {
 	public static void main(String[] args) {
 		HashMaps<Integer, String> hashMap = new HashMaps<>();
 		hashMap.put(1, "value 1");
-        hashMap.put(2, "value 2");
-        hashMap.put(4, "value 4");
-        hashMap.put(5, "value 5");
-
-        String value1 = hashMap.get(2);
-        System.out.println(value1);
-        
-        hashMap.put(2, "value 2 updated");
-        
-        String value2 = hashMap.get(2);
-        System.out.println(value2);
-        
-        String value3 = hashMap.get(6);
-        System.out.println(value3);
+	        hashMap.put(2, "value 2");
+	        hashMap.put(4, "value 4");
+	        hashMap.put(5, "value 5");
+	
+	        String value1 = hashMap.get(2);
+	        System.out.println(value1);
+	        
+	        hashMap.put(2, "value 2 updated");
+	        
+	        String value2 = hashMap.get(2);
+	        System.out.println(value2);
+	        
+	        String value3 = hashMap.get(6);
+	        System.out.println(value3);
 	}
 }
