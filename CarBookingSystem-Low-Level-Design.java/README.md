@@ -41,3 +41,15 @@ The main flow of the system is as follows:
    
 Refer to the `main` method in the `CarBookingsystem` class for an example of how to use the system.
 
+
+## Example Output
+
+```plaintext
+booking done - 
+invoice generated below 
+vehicle name : Toyota
+model name : Camry
+vehicle number 3973
+booking date :  Wed Aug 14 20:36:04 GMT 2024
+bill number : 6328
+reservation number : 8645
