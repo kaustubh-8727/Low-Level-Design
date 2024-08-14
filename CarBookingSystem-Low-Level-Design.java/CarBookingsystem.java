@@ -286,80 +286,80 @@ class Payment {
 
 public class CarBookingsystem {
 	public static void main(String[] args) {
-	    
-	    // intialize car booking object
-	    CarBookingManagement carBookingManagement = new CarBookingManagement();
-	    
-	    // create vehicles
-		List<Vehicle> vehicleList1 = createVehicles();
-		List<Vehicle> vehicleList2 = createVehicles();
-		
-		// create location
-		Location location1 = new Location("USA", "Arizona", "Phoenix", "85001");
-		Location location2 = new Location("USA", "New York", "Albany", "12207");
-		
-		// create stores
-		Store store1 = new Store();
-		store1.setLocation(location1);
-		store1.setVehicleInventory(vehicleList1);
+        
+        // intialize car booking object
+        CarBookingManagement carBookingManagement = new CarBookingManagement();
+        
+        // create vehicles
+        List<Vehicle> vehicleList1 = createVehicles();
+        List<Vehicle> vehicleList2 = createVehicles();
+        
+        // create location
+        Location location1 = new Location("USA", "Arizona", "Phoenix", "85001");
+        Location location2 = new Location("USA", "New York", "Albany", "12207");
+        
+        // create stores
+        Store store1 = new Store();
+        store1.setLocation(location1);
+        store1.setVehicleInventory(vehicleList1);
 
-		Store store2 = new Store();
-		store2.setLocation(location2);
-		store2.setVehicleInventory(vehicleList2);
-		
-		// create users
-		User user1 = new User("alex", 26, "AZ34-56", "999888999");
-		User user2 = new User("jimmy", 28, "JP68-34", "77766222");
-		List<User> users = new ArrayList<>();
-		users.add(user1);
-		users.add(user2);
-		
+        Store store2 = new Store();
+        store2.setLocation(location2);
+        store2.setVehicleInventory(vehicleList2);
+        
+        // create users
+        User user1 = new User("alex", 26, "AZ34-56", "999888999");
+        User user2 = new User("jimmy", 28, "JP68-34", "77766222");
+        List<User> users = new ArrayList<>();
+        users.add(user1);
+        users.add(user2);
+        
         // set users and stores for booking
-		carBookingManagement.setUsers(users);
-		carBookingManagement.addStore(location1, store1);
-		carBookingManagement.addStore(location2, store2);
-		
-		// start car booking
-		
-		// 1. user come
-		User user = users.get(0);
-		
-		// 2. user selects the location to get all the stores in that location
-		Location location = location1;
-		
-		// 3. user fetch all the stores in that location
-		List<Store> stores = carBookingManagement.getStoresInLocation(location1);
-		
-		// 4. user fetch all the available vehicles in first store
-		Store store = stores.get(0);
-		List<Vehicle> vehicles = store.getVehicles();
-		
-		// 5. user selects second vehicle that is a car for booking
-		Vehicle vehicle = vehicles.get(1);
-		
-		// 6. user reserve the car
-		Reservation reservation = store.createReservation(vehicle, user);
-		
-		// 7. user book the car and get the bill
+        carBookingManagement.setUsers(users);
+        carBookingManagement.addStore(location1, store1);
+        carBookingManagement.addStore(location2, store2);
+        
+        // start car booking
+        
+        // 1. user come
+        User user = users.get(0);
+        
+        // 2. user selects the location to get all the stores in that location
+        Location location = location1;
+        
+        // 3. user fetch all the stores in that location
+        List<Store> stores = carBookingManagement.getStoresInLocation(location1);
+        
+        // 4. user fetch all the available vehicles in first store
+        Store store = stores.get(0);
+        List<Vehicle> vehicles = store.getVehicles();
+        
+        // 5. user selects second vehicle that is a car for booking
+        Vehicle vehicle = vehicles.get(1);
+        
+        // 6. user reserve the car
+        Reservation reservation = store.createReservation(vehicle, user);
+        
+        // 7. user book the car and get the bill
         Bill bill = new Bill(reservation);
 
         // 8. user do the payment
         Payment payment = new Payment();
         payment.payBill(bill);
-	}
-	
-	private static List<Vehicle> createVehicles() {
-	    List<Vehicle> vehicles = new ArrayList<>();
-	    vehicles.add(getNewVehicle());
-	    vehicles.add(getNewVehicle());
-	    
-	    return vehicles;
-	}
-	
-	public static Vehicle getNewVehicle() {
-	    
-	    Vehicle vehicle = new Vehicle();
-	    VehicleType vehicleType = VehicleType.CAR;
+    }
+
+    private static List<Vehicle> createVehicles() {
+        List<Vehicle> vehicles = new ArrayList<>();
+        vehicles.add(getNewVehicle());
+        vehicles.add(getNewVehicle());
+        
+        return vehicles;
+    }
+
+    public static Vehicle getNewVehicle() {
+        
+        Vehicle vehicle = new Vehicle();
+        VehicleType vehicleType = VehicleType.CAR;
         vehicleStatus status = vehicleStatus.AVAILABLE;
         int vehicleId = (int)(Math.random() * 9000) + 1000;
         vehicle.setVehicleCompanyName("Toyota");
@@ -372,5 +372,5 @@ public class CarBookingsystem {
         vehicle.setVehicleStatus(status);
         
         return vehicle;
-	}
+    }
 }
