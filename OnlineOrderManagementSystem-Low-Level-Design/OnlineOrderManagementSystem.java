@@ -380,70 +380,69 @@ class Address {
 public class OnlineOrderManagementSystem {
 	public static void main(String[] args) {
 
-        // create user address
-        Address userAddress = new Address("USA", "Arizona", "Phoenix", "85001");
+	        // create user address
+	        Address userAddress = new Address("USA", "Arizona", "Phoenix", "85001");
+	
+	        //create warehouse address
+	        Address warehouseAddress = new Address("USA", "New York", "Albany", "12207");
 
-        //create warehouse address
-        Address warehouseAddress = new Address("USA", "New York", "Albany", "12207");
-
-		
 		// create products
 		Product product1 = new Product("IPhone1");
 		Product product2 = new Product("IPhone2");
 		Product product3 = new Product("pepsi1");
 		Product product4 = new Product("pepsi2");
 
-        // create product categories
-        ProductCategory productCategory1 = new ProductCategory(1001, "IPhone category", 80000.0);
-        productCategory1.addProduct(product1);
-        productCategory1.addProduct(product2);
-
-        ProductCategory productCategory2 = new ProductCategory(1002, "pepsi category", 20.00);
-        productCategory1.addProduct(product3);
-        productCategory1.addProduct(product4);
-
-        // create inventory
-        ProductInventory productInventory = new ProductInventory();
-        productInventory.addProductCategory(productCategory1);
-        productInventory.addProductCategory(productCategory2);
-
-        // create warehouse
-        Warehouse warehouse = new Warehouse(warehouseAddress);
-        warehouse.addInventory(productInventory);
-
-        // intialize warehouse controller
-        WarehouseManagement warehouseManagement = new WarehouseManagement();
-        warehouseManagement.addWarehouse(warehouse);
-
-        // intialize order controller
-        OrderController orderManagement = new OrderController();
-
-        // create user
-        User user1 = new User("alley", userAddress);
-        User user2 = new User("mike", userAddress);
-
-        // start the order management system
-
-        // 1. user comes
-        User user = user1;
-
-        // 2. get nearest warehouse
-        Warehouse nearestWarehouse = warehouseManagement.getWarehouse(new ClosestWarehouseSelectionStrategy(userAddress));
-
-        // 3. get the inventory to select the products
-        productInventory = nearestWarehouse.getInventory();
-
-        // 4. select the product that user wants
-        String userPreference = "IPhone category";
-        ProductCategory productCategory = productInventory.getProductCategoryFromName(userPreference);
-
-        // 5. user add product to the cart
-        user.addProductToCart(productCategory, 2);
-
-        // 6. user intiates the order
-        Order order = orderManagement.createNewOrder(user, nearestWarehouse);
-
-        // 7. user confirms order and checkout
-        orderManagement.checkoutOrder(order);
+	        // create product categories
+	        ProductCategory productCategory1 = new ProductCategory(1001, "IPhone category", 80000.0);
+	        productCategory1.addProduct(product1);
+	        productCategory1.addProduct(product2);
+	
+	        ProductCategory productCategory2 = new ProductCategory(1002, "pepsi category", 20.00);
+	        productCategory1.addProduct(product3);
+	        productCategory1.addProduct(product4);
+	
+	        // create inventory
+	        ProductInventory productInventory = new ProductInventory();
+	        productInventory.addProductCategory(productCategory1);
+	        productInventory.addProductCategory(productCategory2);
+	
+	        // create warehouse
+	        Warehouse warehouse = new Warehouse(warehouseAddress);
+	        warehouse.addInventory(productInventory);
+	
+	        // intialize warehouse controller
+	        WarehouseManagement warehouseManagement = new WarehouseManagement();
+	        warehouseManagement.addWarehouse(warehouse);
+	
+	        // intialize order controller
+	        OrderController orderManagement = new OrderController();
+	
+	        // create user
+	        User user1 = new User("alley", userAddress);
+	        User user2 = new User("mike", userAddress);
+	
+	        // start the order management system
+	
+	        // 1. user comes
+	        User user = user1;
+	
+	        // 2. get nearest warehouse
+	        Warehouse nearestWarehouse = warehouseManagement.getWarehouse(new ClosestWarehouseSelectionStrategy(userAddress));
+	
+	        // 3. get the inventory to select the products
+	        productInventory = nearestWarehouse.getInventory();
+	
+	        // 4. select the product that user wants
+	        String userPreference = "IPhone category";
+	        ProductCategory productCategory = productInventory.getProductCategoryFromName(userPreference);
+	
+	        // 5. user add product to the cart
+	        user.addProductToCart(productCategory, 2);
+	
+	        // 6. user intiates the order
+	        Order order = orderManagement.createNewOrder(user, nearestWarehouse);
+	
+	        // 7. user confirms order and checkout
+	        orderManagement.checkoutOrder(order);
 	}
 }
