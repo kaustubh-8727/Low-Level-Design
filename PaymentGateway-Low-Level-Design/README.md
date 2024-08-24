@@ -39,6 +39,13 @@ The system is divided into the following main components:
 - **TransactionDO**: Represents the data object for a transaction.
 - **TransactionController**: Manages the creation and processing of transactions between users.
 
+
+## Future Enhancements
+
+- **Security**: Implement additional security measures such as encryption for sensitive data and OAuth for user authentication.
+- **Refunds**: Add functionality to handle refunds.
+- **Notifications**: Integrate with an email or SMS service to notify users of successful transactions.
+
 ## Sample Output
 
 ```plaintext
@@ -55,9 +62,3 @@ Transaction ID: 6b2171d4-c168-4a5c-9b1c-5079c602d78b, Amount: 50, Status: SUCCES
 
 Transaction History for User 2:
 Transaction ID: 6b2171d4-c168-4a5c-9b1c-5079c602d78b, Amount: 50, Status: SUCCESS, Sender ID: 44e598c2-beb8-4936-bd9e-ab005e4ad748, Receiver ID: c00cafc4-3afa-4623-b432-4bf28cbdb53d
-
-## Future Enhancements
-
-- **Security**: Implement additional security measures such as encryption for sensitive data and OAuth for user authentication.
-- **Refunds**: Add functionality to handle refunds.
-- **Notifications**: Integrate with an email or SMS service to notify users of successful transactions.
