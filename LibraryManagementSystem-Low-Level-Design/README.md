@@ -96,3 +96,24 @@ This project represents a low-level design for a Library Management System imple
 2. **Manage Books**: Use `BookService` to add or remove books and search by different criteria.
 3. **Manage Members**: Register members, issue library cards, and manage fines using `LibraryManager`.
 4. **Handle Reservations**: Issue and return books with reservations, including fine calculations for late returns.
+
+## Sample Output
+
+```
+Reservation ID: RES-29972C7E
+Book Title: A Brief History of Time
+Book Author: Stephen Hawking
+Member Name: mike
+Member ID: MEM-9090
+Reservation Date: 2024-09-06
+Expiry Date: 2024-09-16
+Reservation Status: RESERVED
+
+Reservation ID: RES-29972C7E
+Book Title: A Brief History of Time
+Book Author: Stephen Hawking
+Member Name: mike
+Member ID: MEM-9090
+Reservation Date: 2024-09-06
+Expiry Date: 2024-09-16
+Reservation Status: RETURNED
