@@ -1,21 +1,37 @@
-/*
-
-1. user
-2. member, librarian
-3. book
-4. book controller
-5. book service
-6. library
-7. library manager(librarian)
-8. reservation
-9. fine
-10. address
-
-*/
+import java.util.List;
+import java.util.ArrayList;
+import java.util.UUID;
+import java.time.temporal.ChronoUnit;
+import java.time.LocalDate;
 
 enum Role {
     ADMIN,
     MEMBER
+}
+
+enum Status {
+    ACTIVE,
+    NON_ACTIVE
+}
+
+enum ReservationStatus {
+    RESERVED,
+    RETURNED
+}
+
+enum Category {
+    COMIC,
+    DOCUMENTRY,
+    SCIENCE,
+    HISTORY,
+    FICTION,
+    NON_FICTION,
+    FANTASY
+}
+
+enum BookStatus {
+    AVAILABLE,
+    ISSUED
 }
 
 abstract class User {
@@ -57,6 +73,7 @@ class Librarian extends User {
 class Member extends User {
     
     LibraryCard libraryCard;
+    private List<Fine> fines;
 
     public Member(String name, String userId, Location address) {
         super(name, userId, address, Role.MEMBER);
@@ -69,20 +86,59 @@ class Member extends User {
     public void setLibraryCard(LibraryCard libraryCard) {
         this.libraryCard = libraryCard;
     }
+    
+    public void setExpiryDate(LocalDate expiryDate) {
+        this.libraryCard.setExpiryDate(expiryDate);
+    }
+    
+    public int getActiveBookReservation() {
+        return libraryCard.getActiveBookReservation().size();
+    }
+    
+    public void addFine(Fine fine) {
+        fines.add(fine);
+    }
+
+    public List<Fine> getFines() {
+        return fines;
+    }
+    
+    public void printMemberDetails() {
+        System.out.println("Member Name: " + this.getName());
+        System.out.println("Member ID: " + this.getUserId());
+        System.out.println("Address: " + this.getAddress().city + ", " + this.getAddress().state + ", " + this.getAddress().country + " - " + this.getAddress().pincode);
+        System.out.println("Library Card ID: " + this.libraryCard.cardId);
+        System.out.println("Library Card Status: " + this.libraryCard.getCardStatus());
+        System.out.println("Issued Date: " + this.libraryCard.issueDate);
+        System.out.println("Expiry Date: " + this.libraryCard.expiryDate);
+        System.out.println("Active Reservations: " + this.getActiveBookReservation());
+
+        System.out.println("\nReservation History:");
+        for (Reservation reservation : this.libraryCard.reservedHistoryList) {
+            System.out.println("Reservation ID: " + reservation.getReservationId());
+            System.out.println("Book Title: " + reservation.book.getBookTitle());
+            System.out.println("Book Author: " + reservation.book.getBookAuthor());
+            System.out.println("Reserved Date: " + reservation.reservedDate);
+            System.out.println("Expiry Date: " + reservation.expiryDate);
+            System.out.println("Reservation Status: " + reservation.reservationStatus);
+            System.out.println("------------------------------");
+        }
+    }
 }
 
 class LibraryCard {
     
-    Date issueDate;
-    Date expiryDate;
+    LocalDate issueDate;
+    LocalDate expiryDate;
     Status cardStatus;
     String cardId;
-    List<Reservation> booksReservedList = new ArrayList<>();
+    List<Reservation> reservedHistoryList = new ArrayList<>();
+    List<Reservation> activeReservedList = new ArrayList<>();
     
-    public LibraryCard(Date issueDate) {
-        cardId = "1234";
+    public LibraryCard(LocalDate issueDate) {
+        cardId = "LC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.issueDate = issueDate;
-        this.expiryDate = issueDate + 30;
+        this.expiryDate = issueDate.plusDays(30);
         this.cardStatus = Status.ACTIVE;
     }
     
@@ -94,16 +150,21 @@ class LibraryCard {
         this.cardStatus = cardStatus;
     }
     
-    public void extendExpiryDate() {
-        this.expiryDate = new Date() + 30;
-    }
-    
     public void addBookReservation(Reservation reservation) {
-        booksReservedList.add(reservation);
+        activeReservedList.add(reservation);
+        reservedHistoryList.add(reservation);
     }
     
-    public List<Reservation> getBookReservation() {
-        return booksReservedList;
+    public List<Reservation> getActiveBookReservation() {
+        return activeReservedList;
+    }
+    
+    public void removeReservation(Reservation reservation) {
+        activeReservedList.remove(reservation);
+    }
+    
+    public void setExpiryDate(LocalDate expiryDate) {
+        this.expiryDate = expiryDate;
     }
 }
 
@@ -116,123 +177,132 @@ class Book {
     Category bookCategory;
     BookStatus bookStatus;
     
-    public Book(String ISBN, String author, String publisher, String title, Category bookCategory) {
-        this.ISBN = ISBN;
+    public Book(String author, String publisher, String title, Category bookCategory) {
+        this.ISBN = "ISBN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.author = author;
         this.publisher = publisher;
         this.title = title;
         this.bookCategory = bookCategory;
         this.bookStatus = BookStatus.AVAILABLE;
     }
+    
+    public void updateBookStatus(BookStatus bookStatus) {
+        this.bookStatus = bookStatus;
+    }
+    
+    public String getBookAuthor() {
+        return author;
+    }
+    
+    public String getBookTitle() {
+        return title;
+    }
+    
+    public String getBookISBN() {
+        return ISBN;
+    }
+    
+    public Category getBookCategory() {
+        return bookCategory;
+    }
+    
 }
 
-// this class is used to store and manage multiple copies of books
-class BookController {
+class BookService {
     
-    List<Book> similarBookList = new ArrayList();
-    
+    List<Book> allBooksList = new ArrayList<>();
+
     public void addBook(Book book) {
-        similarBookList.add(book);
+        allBooksList.add(book);
     }
-    
-    public void removeBook(Book book) {
-        similarBookList.remove(book);
+
+    public void removeBook(Book book) throws Exception {
+        if (!allBooksList.remove(book)) {
+            throw new Exception("Book with ISBN " + book.getBookISBN() + " not found");
+        }
     }
-    
-    public Book getBookByAuthor(String author) {
-        for(Book book : similarBookList) {
-            if(book.getAuthorName() == author && book.getBookStatus() == BookStatus.AVAILABLE) {
-                return book;
+
+    public List<Book> searchBook(String keyword, SearchBookService searchBookService) throws Exception {
+        List<Book> matchedBooks = new ArrayList<>();
+
+        for (Book book : allBooksList) {
+            if (searchBookService.searchBook(book, keyword)) {
+                matchedBooks.add(book);
             }
         }
-        return null;
-    }
-    
-    public Book getBookByTitle(String title) {
-        for(Book book : similarBookList) {
-            if(book.getTitleName() == title && book.getBookStatus() == BookStatus.AVAILABLE) {
-                return book;
-            }
+
+        if (matchedBooks.isEmpty()) {
+            throw new Exception("No book found matching the keyword: " + keyword);
         }
-        return null;
-    }
-    
-    public Book getBookByCategory(Category bookCategory) {
-        for(Book book : similarBookList) {
-            if(book.getBookCategory() == bookCategory && book.getBookStatus() == BookStatus.AVAILABLE) {
-                return book;
-            }
-        }
-        return null;
+
+        return matchedBooks;
     }
 }
 
-
-class BookManager {
-    
-    List<BookController> allBooksList = new ArrayList<>();
-    
-    public addBookController(BookController bookController) {
-        allBooksList.add(bookController);
-    }
-    
-    public removeBookController(BookController bookController) {
-        allBooksList.remove(bookController);
-    }
-    
-    public List<Book> searchBook(String keyword, SearchBookService searchBookService) {
-        
-        return searchBookService.searchBook(bookController, keyword);
-    }
-}
 
 abstract class SearchBookService {
     
-    public abstract List<Book> searchBook(List<BookController>, String keyword);
+    public abstract boolean searchBook(Book book, String keyword);
+    public abstract boolean searchBook(Book book, Category category);
 }
 
 class SearchBookByAuthor extends SearchBookService {
     
-    List<Book> searchBook(List<BookController> bookController, String author) {
-        List<Book> books = new ArrayList<>();
-        for(BookController bookController : allBooksList) {
-            Book book = bookController.getBookByAuthor(author);
-            if(book != null) {
-                books.add(book);
-            } 
+    public boolean searchBook(Book book, String keyword) {
+        if(book.getBookAuthor() == keyword) {
+            return true;
         }
-        
-        return books;
+        return false;
+    }
+    
+    public boolean searchBook(Book book, Category category) {
+        // Not applicable for title search, return false
+        return false;
     }
 }
 
 class SearchBookByTitle extends SearchBookService {
     
-    List<Book> searchBook(List<BookController> bookController, String title) {
-        List<Book> books = new ArrayList<>();
-        for(BookController bookController : allBooksList) {
-            Book book = bookController.getBookByTitle(title);
-            if(book != null) {
-                books.add(book);
-            } 
+    public boolean searchBook(Book book, String keyword) {
+        if(book.getBookTitle() == keyword) {
+            return true;
         }
-        
-        return books;
+        return false;
+    }
+    
+    public boolean searchBook(Book book, Category category) {
+        // Not applicable for title search, return false
+        return false;
     }
 }
 
 class SearchBookByISBN extends SearchBookService {
     
-    List<Book> searchBook(List<BookController> bookController, String ISBN) {
-        List<Book> books = new ArrayList<>();
-        for(BookController bookController : allBooksList) {
-            Book book = bookController.getBookByISBN(ISBN);
-            if(book != null) {
-                books.add(book);
-            } 
+    public boolean searchBook(Book book, String keyword) {
+        if(book.getBookISBN() == keyword) {
+            return true;
         }
-        
-        return books;
+        return false;
+    }
+    
+    public boolean searchBook(Book book, Category category) {
+        // Not applicable for title search, return false
+        return false;
+    }
+}
+
+class SearchBookByCategory extends SearchBookService {
+    
+    public boolean searchBook(Book book, Category keyword) {
+        if(book.getBookCategory() == keyword) {
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean searchBook(Book book, String keyword) {
+        // Not applicable for title search, return false
+        return false;
     }
 }
 
@@ -241,7 +311,7 @@ class Library {
     String libraryName;
     Location address;
     String description;
-    BookManager bookManager;
+    BookService bookService;
     Librarian librarian;
     
     public Library(String libraryName, Location address, String description) {
@@ -250,12 +320,16 @@ class Library {
         this.description = description;
     }
     
-    public void setBookManager(BookManager bookManager) {
-        this.bookManager = bookManager;
+    public void setBookService(BookService bookService) {
+        this.bookService = bookService;
     }
     
-    public setLibrarian(Librarian librarian) {
+    public void setLibrarian(Librarian librarian) {
         this.librarian = librarian;
+    }
+    
+    public BookService getBookService() {
+        return bookService;
     }
 }
 
@@ -264,13 +338,14 @@ class LibraryManager {
     Library library;
     List<Member> membersList = new ArrayList<>();
     List<Reservation> reservationsList = new ArrayList<>();
+    int MAX_BOOK_ALLOTMENT = 5;
     
     public void setLibrary(Library library) {
         this.library = library;
     }
     
     public void registerMember(Member member) {
-        LibraryCard libraryCard = new LibraryCard(new Date());
+        LibraryCard libraryCard = new LibraryCard(LocalDate.now());
         member.setLibraryCard(libraryCard);
         membersList.add(member);
     }
@@ -284,32 +359,36 @@ class LibraryManager {
         }
     }
     
-    public void renewMemberShip(Member member) {
+    public void renewMemberShip(String memberId) {
         Member member = getMember(memberId);
         
-        if(member !== null) {
-            member.extendExpiryDate();
+        if(member != null) {
+            member.setExpiryDate(LocalDate.now().plusDays(30));
         }
     }
     
-    public List<Book> searchBook(String keyword, SearchBookService searchBookService) {
-        return library.getBookManager().searchBook(keyword, searchBookService);
+    public List<Book> searchBook(String keyword, SearchBookService searchBookService) throws Exception {
+        return library.getBookService().searchBook(keyword, searchBookService);
     }
     
-    public void issueBook(String memberId, String bookISBN) {
-        Book book = library.getBookManager().searchBook(bookISBN, new SearchBookByISBN()).get(0);
+    public Reservation issueBook(String memberId, String bookISBN) throws Exception {
+        Book book = library.getBookService().searchBook(bookISBN, new SearchBookByISBN()).get(0);
         Member member = getMember(memberId);
         
         boolean isValid = validateBookAllotment(member, book);
         
         if(isValid == false) {
             System.out.println("book cannot be issued");
-            return;
+            return null;
         }
         
         Reservation reservation = new Reservation();
-        reservation.createReservation(memberId, book);
+        reservation.createReservation(member, book);
+        reservation.printReservationDetails();
         
+        reservationsList.add(reservation);
+        
+        return reservation;
     }
     
     public void returnBook(String reservationId) {
@@ -322,8 +401,8 @@ class LibraryManager {
             return;
         }
         
-        reservation.cancelReservation();
-        
+        reservation.endReservation();
+        reservationsList.remove(reservation);
     }
     
     public Member getMember(String memberId) {
@@ -332,6 +411,17 @@ class LibraryManager {
                 return member;
             }
         }
+        return null;
+    }
+    
+    public Reservation getReservation(String reservationId) {
+        
+        for(Reservation reservation : reservationsList) {
+            if(reservation.getReservationId() == reservationId) {
+                return reservation;
+            }
+        }
+        
         return null;
     }
     
@@ -349,6 +439,11 @@ class LibraryManager {
         
         if (member.getLibraryCard().getCardStatus() != Status.ACTIVE) {
             System.out.println("Member's library card is not active");
+            return false;
+        }
+        
+        if(member.getActiveBookReservation() == MAX_BOOK_ALLOTMENT) {
+            System.out.println("Member's reserved books limit exceeded");
             return false;
         }
         
@@ -377,8 +472,171 @@ class LibraryManager {
 
 }
 
+class Reservation {
+    
+    String reservationId;
+    Book book;
+    Member member;
+    LocalDate reservedDate;
+    LocalDate expiryDate;
+    ReservationStatus reservationStatus;
+    Fine fine;
+    
+    public void createReservation(Member member, Book book) {
+        this.reservationId = "RES-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        this.book = book;
+        this.member = member;
+        this.reservedDate = LocalDate.now();
+        this.expiryDate = reservedDate.plusDays(10);
+        this.reservationStatus = ReservationStatus.RESERVED;
+        
+        this.member.getLibraryCard().addBookReservation(this);
+        this.book.updateBookStatus(BookStatus.ISSUED);
+    }
+    
+    public String getReservationId() {
+        return reservationId;
+    }
+    
+    public void endReservation() {
+        
+        LocalDate returnDate = LocalDate.now();
+        
+        if (returnDate.isAfter(expiryDate)) {
+            long daysLate = ChronoUnit.DAYS.between(expiryDate, returnDate);
+            double fineAmount = calculateFine(daysLate);
+            this.fine = new Fine(fineAmount, returnDate);
+            member.addFine(fine);
+            System.out.println("Book returned late! Fine imposed: " + fineAmount);
+        }
+        
+        this.reservationStatus = ReservationStatus.RETURNED;
+        this.member.getLibraryCard().removeReservation(this);
+        this.book.updateBookStatus(BookStatus.AVAILABLE);
+    }
+    
+    private double calculateFine(long daysLate) {
+        return daysLate * 10;
+    }
+
+    public Fine getFine() {
+        return fine;
+    }
+    
+    public void printReservationDetails() {
+        System.out.println("Reservation ID: " + reservationId);
+        System.out.println("Book Title: " + book.getBookTitle());
+        System.out.println("Book Author: " + book.getBookAuthor());
+        System.out.println("Member Name: " + member.getName());
+        System.out.println("Member ID: " + member.getUserId());
+        System.out.println("Reservation Date: " + reservedDate);
+        System.out.println("Expiry Date: " + expiryDate);
+        System.out.println("Reservation Status: " + reservationStatus);
+        System.out.println();
+    }
+}
+
+class Fine {
+    private double amount;
+    private LocalDate fineDate;
+    private boolean isPaid;
+
+    public Fine(double amount, LocalDate fineDate) {
+        this.amount = amount;
+        this.fineDate = fineDate;
+        this.isPaid = false;
+    }
+
+    public double getAmount() {
+        return amount;
+    }
+
+    public LocalDate getFineDate() {
+        return fineDate;
+    }
+
+    public boolean isPaid() {
+        return isPaid;
+    }
+
+    public void payFine() {
+        this.isPaid = true;
+    }
+
+    public String toString() {
+        return "Fine Amount: " + amount + ", Fine Date: " + fineDate + ", Paid: " + isPaid;
+    }
+}
+
+
+class Location {
+    String country;
+    String state;
+    String city;
+    String pincode;
+    
+    public Location(String country, String state, String city, String pincode) {
+        this.country = country;
+        this.state = state;
+        this.city = city;
+        this.pincode = pincode;
+    }
+}
+
 public class Main {
 	public static void main(String[] args) {
-		System.out.println("Hello World");
+		
+		try {
+            // create books
+            Book book1 = new Book("George Orwell", "Secker & Warburg", "1984", Category.FICTION);
+            Book book2 = new Book("Stephen Hawking", "Bantam Books", "A Brief History of Time", Category.SCIENCE);
+            Book book3 = new Book("J.K. Rowling", "Bloomsbury", "Harry Potter and the Philosopher's Stone", Category.FANTASY);
+            Book book4 = new Book("Yuval Noah Harari", "Harper", "Sapiens: A Brief History of Humankind", Category.NON_FICTION);
+            Book book5 = new Book("F. Scott Fitzgerald", "Charles Scribner's Sons", "The Great Gatsby", Category.FICTION);
+
+            // create book service
+            BookService bookService = new BookService();
+            bookService.addBook(book1);
+            bookService.addBook(book2);
+            bookService.addBook(book3);
+            bookService.addBook(book4);
+            bookService.addBook(book5);
+            
+            // create Librarian
+            Librarian librarian = new Librarian("jack", "lib-6556", new Location("USA", "Arizona", "Phoenix", "zx-6756"));
+            
+            // create member
+            Member member = new Member("mike", "MEM-9090", new Location("USA", "Arizona", "Phoenix", "zx-6756"));
+            
+            // create library
+            Library library = new Library("book world", new Location("USA", "Arizona", "Phoenix", "zx-6756"), "book reader world");
+            library.setBookService(bookService);
+            
+            // create library manager
+            LibraryManager libraryManager = new LibraryManager();
+            libraryManager.setLibrary(library);
+            
+            // 1. member comes and apply for membership
+            libraryManager.registerMember(member);
+            
+            // 2. member searches for book by title
+            List<Book> matchedBooks = libraryManager.searchBook("A Brief History of Time", new SearchBookByTitle());
+            
+            // 3. member selects favourite book
+            Book favouriteBook = matchedBooks.get(0);
+            
+            // 4. member issue the book
+            Reservation reservation = libraryManager.issueBook(member.getUserId(), favouriteBook.getBookISBN());
+            
+            // 5. member cancels reservation
+            libraryManager.returnBook(reservation.getReservationId());
+            
+            // 6. print reservation after return
+            reservation.printReservationDetails();
+		
+		}
+		catch(Exception e) {
+		    System.out.println(e);
+		}
 	}
 }
