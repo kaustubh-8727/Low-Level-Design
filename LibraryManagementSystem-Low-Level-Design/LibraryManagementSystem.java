@@ -583,7 +583,7 @@ class Location {
     }
 }
 
-public class Main {
+public class LibraryManagementSystem {
 	public static void main(String[] args) {
 		
 		try {
