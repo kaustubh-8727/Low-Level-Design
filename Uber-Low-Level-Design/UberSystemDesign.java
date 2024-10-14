@@ -18,6 +18,18 @@ enum CarType {
     SIX_SEATER
 }
 
+enum RideStatus {
+    BOOKED,
+    PENDING,
+    FAILED,
+    CANCELLED
+}
+
+enum DriverStatus {
+    AVAILABLE,
+    NOT_AVAILABLE,
+}
+
 interface Vehicle {
     String vehicleId;
     String vehicleName;
@@ -82,6 +94,137 @@ class Driver {
     
     public void notifyDriver(Ride ride) {
         // ride request notification sent to the driver
+    }
+}
+
+class DriverService {
+    List<Driver> driverList = new ArrayList<>();
+    
+    public DriverService() {
+        
+    }
+    
+    public void addDriver(Driver driver) {
+        driverList.add(driver);
+    }
+    
+    public void removeDriver(String driverId) {
+        Driver driver = getDriver(driverId);
+        driverList.remove(driver);
+    }
+    
+    public List<Driver> getNearestDriver(Location location) {
+        // logic to return all the available drivers that are closest to the given location
+        return driverList;
+    }
+}
+
+class Rider {
+    String name;
+    String riderId;
+    String contacNumber;
+    String emailId;
+    
+    public Rider(String name, String riderId, String contacNumber, String emailId) {
+        this.riderId = "1234";
+        this.name = this.name;
+        this.contacNumber = contacNumber;
+        this.emailId = emailId;
+    }
+    
+    public void notifyRider(Ride ride) {
+        // ride confirmation request sent to rider
+    }
+}
+
+class Location {
+    String country;
+    String state;
+    String city;
+    String area;
+    String pincode;
+    
+    public Location(String country, String state, String city, String area, String pincode) {
+        this.country = country;
+        this.state = state;
+        this.city = city;
+        this.area = area;
+        this.pincode = pincode;
+    }
+}
+
+class Ride {
+    String rideId;
+    Location source;
+    Location destination;
+    Rider rider;
+    Driver driver;
+    double fare;
+    RideStatus rideStatus;
+    
+    public Ride(String source, String destination, Rider rider) {
+        this.rideId = "1234";
+        this.source = source;
+        this.destination = destination;
+        this.rideStatus = RideStatus.PENDING;
+        this.rider = rider;
+    }
+    
+    public void setRideer(Rider rider) {
+        this.rider = rider;
+    }
+    
+    public void setDriver(Driver driver) {
+        this.driver = driver;
+    }
+    
+    public void setFare(double fare) {
+        this.fare = fare;
+    }
+    
+    public void setRideStatus(String rideStatus) {
+        this.rideStatus = ridestatus;
+    }
+}
+
+class RideService {
+    List<Ride> bookedRides = new ArrayList<>();
+    DriverService driverService;
+    
+    double oneKmPrice = 5.00;
+    
+    public RideService(DriverService driverService) {
+        this.driverService = driverService;
+    }
+    
+    public double getRideFare(Ride ride) {
+        // logic to calculate fare
+        return 1.00;
+    }
+    
+    public List<Driver> getDriverForRide(Ride ride) {
+        return driverService.getNearestDriver(ride.getSourceLocation);
+    }
+    
+    public Ride bookRide(Ride ride, Driver driver) {
+        ride.setDriver(driver);
+        ride.setFare(getRideFare(ride));
+        ride.setRideStatus(rideStatus.BOOKED);
+        driver.updateDriverStatus(DriverStatus.NOT_AVAILABLE);
+        driver.notifyDriver();
+        bookedRides.add(ride);
+        return ride;
+    }
+    
+    public Ride cancelRide(String rideId) {
+        Ride ride = getRide(rideId);
+        if(ride != NULL) {
+            ride.setRideStatus(RideStatus.CANCELLED);
+            driver.updateDriverStatus(DriverStatus.AVAILABLE);
+            driver.notifyDriver();
+        }
+        
+        return ride;
     }
 }
 
