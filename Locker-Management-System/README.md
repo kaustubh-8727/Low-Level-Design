@@ -1,77 +1,114 @@
 # Locker Management System
 
-## Overview
-The **Locker Management System** is designed for e-commerce platforms, allowing users to choose a nearby locker for convenient package delivery and return. This system manages locker allocation, authentication, and notifications, providing users with secure, flexible, and reliable package pickup and return options.
-
-### Key Features
-- Random or size-based locker allocation
-- OTP-based authentication for secure package access
-- Notifications to users and delivery personnel
-- Admin tools for monitoring and vacating lockers in extended use
-
----
+This project simulates a Locker Management System, handling end-to-end order processing with locker allocations. Key components include user and order management, locker allocations based on user needs, and delivery personnel assignments. The code organizes classes, enums, and interfaces into an effective, modular design for managing order workflows and locker allocation services.
 
 ## Table of Contents
-1. [System Components](#system-components)
-2. [Entity Descriptions](#entity-descriptions)
-3. [Installation and Setup](#installation-and-setup)
-4. [Usage](#usage)
-5. [Future Enhancements](#future-enhancements)
+1. [Overview](#overview)
+2. [Classes and Core Components](#classes-and-core-components)
+3. [Key Services](#key-services)
+4. [Enums](#enums)
+5. [Usage and Flow](#usage-and-flow)
+6. [Example Code Execution](#example-code-execution)
 
----
+## Overview
 
-## System Components
+The Locker Management System enables users to create orders, assigns delivery personnel, and allocates lockers to securely store delivered items. Key features include:
+- User registration and order creation
+- Cart management
+- Delivery personnel assignment and management
+- Locker allocation based on size and availability
+- Order authentication and retrieval from lockers
 
-### Core Entities
-- **Person**: Represents any individual using the system, including customers, delivery personnel, and admins.
-- **Order**: Contains order-specific details and links to locker allocation.
+## Classes and Core Components
 
-### Locker and Management
-- **Locker**: Represents an individual locker where packages are stored.
-- **Locker Manager**: Manages locker availability and assignment.
-- **Locker Allocation Service**: Handles the assignment of lockers based on availability and package size.
+### 1. **User**
+   - Represents a customer with unique `userId`, address, `cart`, and OTP.
+   - Methods include adding and removing products from the cart, and setting OTP for locker authentication.
 
-### Authentication and Notifications
-- **Authentication**: Generates and verifies OTPs to secure locker access.
-- **Notification Service**: Sends OTPs and other notifications to customers and delivery personnel.
+### 2. **DeliveryMan**
+   - Manages details of the delivery personnel such as ID, status, and contact information.
+   - `DeliveryManStatus` indicates availability.
 
-### User Roles
-- **Delivery Person**: Manages package drop-off and pickup.
-- **Delivery Manager**: Oversees delivery personnel and processes.
-- **Admin**: Monitors system status and locker occupancy.
+### 3. **Location**
+   - Stores location details including `country`, `state`, `city`, `area`, and `pincode`.
 
----
+### 4. **Locker**
+   - Represents a locker with a unique `lockerId`, `lockerCategory` (size), and `lockerStatus`.
+   - Can generate and store an OTP for order retrieval.
 
-## Entity Descriptions
+### 5. **Order**
+   - Encapsulates an order's information, including ID, status, associated user, and a list of products.
+   - Methods for checkout, setting locker requirements, and payment processing.
 
-### 1. Person
-Represents an individual in the system, holding general information such as name, contact, and role.
+### 6. **Product**
+   - Represents an individual product with name, ID, and price.
 
-### 2. Customer
-A type of Person representing users who place orders and retrieve or return items from lockers. They receive OTPs for secure package access.
+### 7. **Cart**
+   - Maintains a mapping of `productId` to quantity within a user's cart.
 
-### 3. DeliveryPerson
-A type of Person responsible for delivering packages to lockers and managing returns.
+## Key Services
 
-### 4. Order
-Contains order details, such as package size, customer ID, locker ID, delivery status, and OTP. Manages locker assignment and OTP generation.
+### 1. **DeliveryManService**
+   - Manages a list of delivery personnel and provides methods to assign an available delivery man to an order.
 
-### 5. Locker
-Represents a physical locker, containing details such as locker ID, size, location, current status, assigned order, and OTP.
+### 2. **LockerService**
+   - Provides methods to allocate lockers based on locker allocation strategies (e.g., by size or location).
+   - Initializes a grid of lockers and provides OTP-based access.
 
-### 6. Locker Manager
-Handles locker availability, assignment, and vacancy checks, including methods to monitor usage durations.
+### 3. **OrderController**
+   - Main controller managing order creation, checkout, and delivery workflows.
+   - Coordinates between `LockerService` and `DeliveryManService` to handle locker allocation and delivery.
 
-### 7. Locker Allocation Service
-Determines locker allocation based on size and availability. Extensible for future custom allocation criteria (e.g., proximity).
+## Enums
 
-### 8. Authentication
-Manages OTP generation and validation to secure locker access for both delivery personnel and customers.
+- **DeliveryManStatus**: Tracks if delivery personnel are `AVAILABLE` or `NOT_AVAILABLE`.
+- **OrderStatus**: Represents the status of an order (`INITIATED`, `IN_DELIVERY`, `DELIVERED`, etc.).
+- **LockerCategory**: Defines locker sizes (`SMALL`, `LARGE`, `EXTRA_LARGE`).
+- **LockerStatus**: Indicates if a locker is `EMPTY` or `OCCUPIED`.
 
-### 9. Notification Service
-Facilitates OTP delivery and other notifications for customers and delivery personnel.
+## Usage and Flow
 
-### 10. Admin
-A role with access to monitor and manage locker occupancy and availability. Can view occupied lockers and vacate those with extended usage.
+1. **User and Product Setup**
+   - Users can be created with a name and address.
+   - Products are added to a user’s cart, specifying quantity.
 
----
+2. **Order Creation and Checkout**
+   - A user’s cart can be converted into an order through the `OrderController`.
+   - During checkout, users may request locker storage, generating a secure OTP for locker access.
+
+3. **Locker Assignment and Authentication**
+   - The `LockerService` assigns an available locker based on a specified strategy.
+   - The system generates an OTP for locker access; only the user with the correct OTP can retrieve their order.
+
+4. **Delivery Assignment**
+   - The `DeliveryManService` assigns an available delivery person to the order.
+   - Delivery status updates are provided, along with order details and delivery contact info.
+
+## Example 
+
+```
+Order Checkout and Delivery:
+
+Order Details:
+Order ID: 2050
+Status: COMPLETED
+User: Alice
+Delivery Address: City, Area, 100001
+
+Products:
+Product ID: 5088, Quantity: 1
+Product ID: 9819, Quantity: 1
+
+Invoice Summary:
+Total Item Price: 400.0
+Tax: 0.0%
+Total Amount Paid: 400.0
+
+Delivery Information:
+Delivery Person: John Doe
+Contact: 1234567890
+Status: On Delivery
+
+Retrieving Order from Locker:
+Order ID: 2050 is delivered and stored in Locker ID: 8327
+Order retrieved successfully from locker.
