@@ -30,7 +30,7 @@ class User {
     String contactNumber;
     
     public User(String userName, String email, String contactNumber) {
-        this.userId = "1234";
+        this.userId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.userName = userName;
         this.email = email;
         this.contactNumber = contactNumber;
@@ -84,7 +84,7 @@ class Review {
     Date reviewTimestamp;
     
     public Review(String productId, String userId, String comment, double stars, ReviewType reviewType) {
-        this.reviewId = "1234";
+        this.reviewId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.productId = productId;
         this.userId = userId;
         this.comment = comment;
@@ -95,6 +95,18 @@ class Review {
     
     public String getReviewId() {
         return reviewId;
+    }
+    
+    public String getProductId() {
+        return productId;
+    }
+    
+    public ReviewType getReviewType() {
+        return reviewType;
+    }
+    
+    public double getRatingStars() {
+        return stars;
     }
 }
 
@@ -129,8 +141,40 @@ class ReviewService {
     }
     
     public List<Review> getReviews(ReviewFilter reviewFilter) {
-        // logic to fetch all the reviews based on review filter
-        return null;
+        List<Review> filteredReviews = new ArrayList<>();
+    
+        for (Review review : allReviews.values()) {
+            boolean matches = false;
+    
+            // Filter by product ID
+            if (reviewFilter.productId != null && review.getProductId().equals(reviewFilter.productId)) {
+                matches = true;
+            }
+    
+            // Filter by text (case-insensitive containment)
+            if (reviewFilter.text != null && review.comment.toLowerCase().contains(reviewFilter.text.toLowerCase())) {
+                matches = true;
+            }
+    
+            // Filter by minimum and maximum rating
+            if (reviewFilter.minRating > 0 && review.getRatingStars() >= reviewFilter.minRating) {
+                matches = true;
+            }
+            if (reviewFilter.maxRating > 0 && review.getRatingStars() <= reviewFilter.maxRating) {
+                matches = true;
+            }
+    
+            // Filter by review type
+            if (reviewFilter.reviewType != null && review.getReviewType() == reviewFilter.reviewType) {
+                matches = true;
+            }
+    
+            if (matches) {
+                filteredReviews.add(review);
+            }
+        }
+    
+        return filteredReviews;
     }
     
     public void removeReview(String reviewId) {
@@ -148,9 +192,63 @@ class ReviewService {
     }
     
     public ReviewSummary getReviewSummary(String productId) {
-        // return review summary 
-        return null;
+        
+        int totalReviewCount = 0;
+        double averageRating = 0.0;
+        int positiveRatingCount = 0;
+        int negativeRatingCount = 0;
+        int neutralRatingCount = 0;
+        double totalRatingStars = 0.0;
+        ReviewType concludedReviewType;
+        
+        for (Map.Entry<String, Review> entry : allReviews.entrySet()) {
+            String key = entry.getKey();
+            Review review = entry.getValue();
+            
+            if(review.getProductId() == productId) {
+                totalReviewCount++;
+                if(review.getReviewType() == ReviewType.POSITIVE) {
+                    positiveRatingCount++;
+                }
+                else if(review.getReviewType() == ReviewType.NEGATIVE) {
+                    negativeRatingCount++;
+                } else {
+                    neutralRatingCount++;
+                }
+                
+                totalRatingStars += review.getRatingStars();
+            }
+        }
+        
+        averageRating = totalRatingStars / totalReviewCount;
+        if(positiveRatingCount > neutralRatingCount && positiveRatingCount > negativeRatingCount) {
+            concludedReviewType = ReviewType.POSITIVE;
+        } else if(negativeRatingCount > positiveRatingCount && negativeRatingCount > neutralRatingCount) {
+            concludedReviewType = ReviewType.NEGATIVE;
+        } else {
+            concludedReviewType = ReviewType.NEUTRAL;
+        }
+        
+        ReviewSummary reviewSummary = new ReviewSummary(totalReviewCount, averageRating, concludedReviewType);
+
+        return reviewSummary;
     }
+    
+    public void displayReviewSummary(String productId) {
+        ReviewSummary reviewSummary = this.getReviewSummary(productId);
+        
+        if (reviewSummary != null) {
+            System.out.println("Review Summary for Product ID: " + productId);
+            System.out.println("Total Reviews: " + reviewSummary.reviewCount);
+            System.out.println("Average Rating: " + reviewSummary.reviewAverageStars);
+            System.out.println("Concluded Review Type: " + reviewSummary.concludedReviewType);
+            System.out.println("------------------------------\n");
+        } else {
+            System.out.println("No reviews found for Product ID: " + productId);
+            System.out.println("------------------------------\n");
+        }
+    }
+
 }
 
 class Product {
@@ -161,6 +259,7 @@ class Product {
     String description;
     
     public Product(String productName, String productType, String description, double price) {
+        this.productId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.productName = productName;
         this.productType = productType;
         this.description = description;
@@ -215,11 +314,12 @@ class ReviewFilter {
     
     
     public ReviewFilter(String productId, String text, double minRating, double maxRating, ReviewType reviewType) {
-        this.filterId = "1234";
+        this.filterId = UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.productId = productId;
         this.text = text;
         this.minRating = minRating;
         this.maxRating = maxRating;
+        this.reviewType = reviewType;
     }
 }
 
@@ -269,6 +369,7 @@ public class Main {
 		// user1 wants to add review to product1
 		String userId = user1.getUserId();
 		String productId = product1.getProductId();
+
 		reviewService.addReview(productId, userId, "best phone ever", 4.5, ReviewType.POSITIVE);
 		
 		// user2 wants to add review to product1
@@ -291,5 +392,28 @@ public class Main {
 		productId = product1.getProductId();
 		reviewService.addReview(productId, userId, "amazing features", 4.5, ReviewType.POSITIVE);
 		
+		// user5 wants to add review to product2
+		userId = user5.getUserId();
+		productId = product2.getProductId();
+		reviewService.addReview(productId, userId, "good product", 4.5, ReviewType.POSITIVE);
+		
+		// display review summary
+		reviewService.displayReviewSummary(productId);
+		
+		// user1 fetches reviews based on filters 
+		ReviewFilter reviewFilter = new ReviewFilter(null, null, 0, 0, ReviewType.NEUTRAL);
+		List<Review> reviewFetchedResult = reviewService.getReviews(reviewFilter);
+
+        for (Review review : reviewFetchedResult) {
+            System.out.println("Review Details:");
+            System.out.println("Review ID: " + review.getReviewId());
+            System.out.println("Product ID: " + review.getProductId());
+            System.out.println("User ID: " + review.userId);
+            System.out.println("Comment: " + review.comment);
+            System.out.println("Stars: " + review.stars);
+            System.out.println("Review Type: " + review.reviewType);
+            System.out.println("Review Timestamp: " + review.reviewTimestamp);
+            System.out.println("------------------------------\n");
+        }
 	}
 }

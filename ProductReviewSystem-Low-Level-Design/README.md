@@ -52,3 +52,22 @@ The system follows a **Singleton Design Pattern** for services:
 All services are accessible via the **`ServiceFactory`**, providing centralized management and improved modularity.
 
 ---
+
+## Sample Output
+
+```
+Review Summary for Product ID: BB2F930F
+Total Reviews: 1
+Average Rating: 4.5
+Concluded Review Type: POSITIVE
+------------------------------
+
+Review Details:
+Review ID: 4AD0AA46
+Product ID: 85724D29
+User ID: C56E10FC
+Comment: just like normal phone
+Stars: 3.0
+Review Type: NEUTRAL
+Review Timestamp: Fri Nov 29 17:49:16 GMT 2024
+------------------------------
