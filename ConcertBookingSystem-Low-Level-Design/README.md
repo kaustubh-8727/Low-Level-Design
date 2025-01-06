@@ -105,16 +105,15 @@ public enum BillStatus {
 - **Reservation**: Manages reservation status and associated seats.
 - **Bill**: Generates and manages billing for reservations.
 
-## How to Run
+## Example Output
 
 ```bash
-# Clone the repository
-git clone https://github.com/yourusername/concert-booking-system.git
-
-# Navigate to the project directory
-cd concert-booking-system
-
-# Compile and run the program
-javac *.java
-java Main
+Reservation Details:
+Reservation ID: 1234
+User: jack, Email: jack@gmail.com
+Concert: magic music show at Shimla
+Seats Reserved: 
+ - Seat ID: 1234, Price: 5000.0
+ - Seat ID: 1234, Price: 3000.0
+Total Price: 10400.0
 ```

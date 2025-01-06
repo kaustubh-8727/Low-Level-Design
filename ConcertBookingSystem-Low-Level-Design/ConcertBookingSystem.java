@@ -23,21 +23,41 @@ enum SeatStatus {
     UNDER_MAINTAINANCE
 }
 
+enum ReservartionStatus {
+    PENDING,
+    COMPLETED,
+    CANCELLED
+}
+
+enum BillStatus {
+    PENDING,
+    SUCCESS,
+    FAILED
+}
+
 class User {
     String username;
     String emailId;
     String contactNumber;
     Location address;
 
-    public User(String username, Strinf emailId, String contactNumber, Location address) {
+    public User(String username, String emailId, String contactNumber, Location address) {
         this.username = username;
         this.emailId = emailId;
         this.contactNumber = contactNumber;
         this.address = address;
     }
 
-    public notifyUser(Reservation reservation) {
-        // print complete reservation details
+    public void notifyUser(Reservation reservation) {
+        System.out.println("Reservation Details:");
+        System.out.println("Reservation ID: " + reservation.getReservationId());
+        System.out.println("User: " + username + ", Email: " + emailId);
+        System.out.println("Concert: " + reservation.concert.getConcertName() + " at " + reservation.concert.getVenue().city);
+        System.out.println("Seats Reserved: ");
+        for (Seat seat : reservation.selectedSeats) {
+            System.out.println(" - Seat ID: " + seat.getSeatId() + ", Price: " + seat.getSeatPrice());
+        }
+        System.out.println("Total Price: " + reservation.getBillDetails().totalPrice);
     }
 }
 
@@ -63,6 +83,7 @@ class Concert {
     private Artist artist;
     private String description;
     private double price;
+    private List<Seat> seats = new ArrayList<>();
 
     public Concert() {
         this.concertId = "1234";
@@ -119,6 +140,23 @@ class Concert {
     public void setPrice(double price) {
         this.price = price;
     }
+
+    public void addSeat(Seat seat) {
+        seats.add(seat);
+    }
+
+    public List<Seat> getAllSeats() {
+        return seats;
+    }
+
+    public Seat getSeatById(String seatId) {
+        for(Seat seat : seats) {
+            if(seat.getSeatId() == seatId) {
+                return seat;
+            }
+        }
+        return null;
+    }
 }
 
 class ConcertController {
@@ -129,7 +167,7 @@ class ConcertController {
         concertList.add(concert);
     }
 
-    public void getConcert(String concertId) {
+    public Concert getConcert(String concertId) {
         for(Concert concert : concertList) {
             if(concert.getConcertId() == concertId) {
                 return concert;
@@ -147,12 +185,32 @@ class ConcertController {
     }
 
     public void updateConcert(String concertId, Concert concert) {
-        Concert concert = this.getConcert(concertId);
+        Concert fetchedConcert = this.getConcert(concertId);
 
-        if(concert != null) {
-            concertList.remove(concert);
+        if(fetchedConcert != null) {
+            concertList.remove(fetchedConcert);
             this.addConcert(concert);
         }
+    }
+
+    public boolean validateSeats(Concert concert, List<Seat> selectedSeatIds) {
+        for(Seat seat : selectedSeatIds) {
+            if(seat.getSeatStatus() != SeatStatus.AVAILABLE) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public List<Concert> fetchConcert(ConcertFilter concertFilter) {
+        List<Concert> filteredConcerts = new ArrayList<>();
+        for (Concert concert : concertList) {
+            if ((concertFilter.concertName == null || concert.getConcertName().contains(concertFilter.concertName)) &&
+                (concertFilter.artist == null || concert.getArtist().artistName.equalsIgnoreCase(concertFilter.artist.artistName))) {
+                filteredConcerts.add(concert);
+            }
+        }
+        return filteredConcerts;
     }
 }
 
@@ -174,9 +232,14 @@ abstract class Seat {
     double price;
     SeatStatus seatStatus;
 
-    public Seat(String price, SeatStatus seatStatus) {
+    public Seat(double price, SeatStatus seatStatus) {
+        this.seatId = "1234";
         this.price = price;
         this.seatStatus = seatStatus;
+    }
+
+    public String getSeatId() {
+        return seatId;
     }
 
     public double getSeatPrice() {
@@ -187,25 +250,29 @@ abstract class Seat {
         this.seatStatus = seatStatus;
     }
 
+    public SeatStatus getSeatStatus() {
+        return seatStatus;
+    }
+
 }
 
 class FirstClassSeat extends Seat {
     
-    public FirstClassSeat(String price, SeatStatus seatStatus) {
+    public FirstClassSeat() {
         super(5000.00, SeatStatus.AVAILABLE);
     }
 }
 
 class SecondClassSeat extends Seat {
     
-    public SecondClassSeat(String price, SeatStatus seatStatus) {
+    public SecondClassSeat() {
         super(3000.00, SeatStatus.AVAILABLE);
     }
 }
 
-class thirdClassSeat extends Seat {
+class ThirdClassSeat extends Seat {
     
-    public ThirdClassSeat(String price, SeatStatus seatStatus) {
+    public ThirdClassSeat() {
         super(1000.00, SeatStatus.AVAILABLE);
     }
 }
@@ -219,7 +286,7 @@ class Reservation {
     List<Seat> selectedSeats;
 
 
-    public Reservation(Concert concert, User user, List<Seat> selectedSeats) {
+    public Reservation(User user, Concert concert, List<Seat> selectedSeats) {
         this.reservationId = "1234";
         this.concert = concert;
         this.user = user;
@@ -230,6 +297,10 @@ class Reservation {
         this.selectedSeats = selectedSeats;
         this.bill = new Bill();
         this.bill.generateBill(selectedSeats, concert);
+    }
+
+    public String getReservationId() {
+        return reservationId;
     }
 
     public void updateReservationStatus(ReservartionStatus reservationStatus) {
@@ -249,6 +320,14 @@ class Reservation {
         for(Seat seat : selectedSeats) {
             seat.updateSeatStatus(SeatStatus.AVAILABLE);
         }
+    }
+
+    public Bill getBillDetails() {
+        return bill;
+    }
+
+    public User getUser() {
+        return user;
     }
 }
 
@@ -283,5 +362,180 @@ class Bill {
 
     public void updateBillStatus(BillStatus billStatus) {
         this.billStatus = billStatus;
+    }
+}
+
+class PaymentService {
+    Payment payment;
+
+    public PaymentService(Payment payment) {
+        this.payment = payment;
+    }
+
+    public boolean makePayment(Bill bill) {
+        return payment.makePayment(bill);
+    }
+}
+
+interface Payment {
+    boolean makePayment(Bill bill);
+}
+
+class UPIPayment implements Payment {
+    public boolean makePayment(Bill bill) {
+        return true;
+    }
+}
+
+class CardPayment implements Payment {
+    public boolean makePayment(Bill bill) {
+        return true;
+    }
+}
+
+class ConcertFilter {
+
+    Artist artist;
+    String concertName;
+
+    public ConcertFilter(Artist artist, String concertName) {
+        this.artist = artist;
+        this.concertName = concertName;
+    }
+}
+
+class ConcertBookingService {
+    PaymentService paymentService = null;
+    ConcertController concertController = null;
+    NotificationService notificationService = null;
+    List<Reservation> reservationList = new ArrayList<>();
+
+    public ConcertBookingService(ConcertController concertController, PaymentService paymentService) {
+        this.concertController = concertController;
+        this.paymentService = paymentService;
+        this.notificationService = new NotificationService();
+    }
+
+    public void addConcert(Concert concert) {
+        concertController.addConcert(concert);
+    }
+
+    public void removeConcert(String concertId) {
+        concertController.removeConcert(concertId);
+    }
+
+    public void updateConcert(String concertId, Concert concert) {
+        concertController.updateConcert(concertId, concert);
+    }
+
+    public List<Concert> fetchConcert(ConcertFilter concertFilter) {
+        return concertController.fetchConcert(concertFilter);
+    }
+
+    public Reservation bookConcert(User user, Concert concert, List<Seat> selectedSeats) {
+        if(concertController.validateSeats(concert, selectedSeats)) {
+            Reservation reservation = new Reservation(user, concert, selectedSeats);
+            reservationList.add(reservation);
+            return reservation;
+        }
+        return null;
+    }
+    
+    public Reservation getReservation(String reservationId) {
+        for(Reservation reservation : reservationList) {
+            if(reservation.getReservationId() == reservationId) {
+                return reservation;
+            }
+        }
+        
+        return null;
+    }
+
+    public void makeConcertPayment(String reservationId) {
+        Reservation reservation = getReservation(reservationId);
+
+        if(reservation == null) {
+            return;
+        }
+
+        Bill bill = reservation.getBillDetails();
+        boolean paymentStatus = paymentService.makePayment(bill);
+
+        if(paymentStatus == true) {
+            reservation.completeReservation();
+        }
+        notificationService.notifyUser(reservation);
+    }
+}
+
+class NotificationService {
+
+    public void notifyUser(Reservation reservation) {
+        User user = reservation.getUser();
+        user.notifyUser(reservation);
+    }
+}
+
+class ConcertBookingSystem {
+    public static void main(String []args) {
+
+        ConcertController concertController = new ConcertController();
+        PaymentService paymentService = new PaymentService(new UPIPayment());
+
+        // create seats
+        Seat seat1 = new FirstClassSeat();
+        Seat seat2 = new SecondClassSeat();
+        Seat seat3 = new ThirdClassSeat();
+        Seat seat4 = new FirstClassSeat();
+
+        // create concert location
+        Location concertLocation = new Location("India", "Himachal Pradesh", "Shimla", "171004");
+
+        // create artist for concert
+        Artist artist = new Artist("ed shreen", "music artist", "music");
+
+        // create concert
+        Concert concert = new Concert();
+        concert.setConcertName("magic music show");
+        concert.setStartDate(new Date());
+        concert.setDescription("music show that will rock the universe");
+        concert.setVenue(concertLocation);
+        concert.setArtist(artist);
+        concert.addSeat(seat1);
+        concert.addSeat(seat2);
+        concert.addSeat(seat3);
+        concert.addSeat(seat4);
+        concert.setPrice(2000.00);
+        
+        concertController.addConcert(concert);
+        ConcertBookingService concertBookingService = new ConcertBookingService(concertController, paymentService);
+        
+
+        // create user address
+        Location userLocation = new Location("India", "UP", "Banaras", "374745");
+
+        // create user
+        User user = new User("jack", "jack@gmail.com", "4757457575", userLocation);
+
+        // 1. user searchs for concert based on concert name
+        ConcertFilter concertFilter = new ConcertFilter(null, "magic music show");
+        List<Concert> fetchedConcerts = concertBookingService.fetchConcert(concertFilter);
+        
+        // 2. user selects the favourite concert
+        Concert favouriteConcert = fetchedConcerts.get(0);
+
+        // 3. user selects seats for booking
+        List<Seat> favouriteSeats = new ArrayList<>();
+        seat1 = favouriteConcert.getAllSeats().get(0);
+        seat2 = favouriteConcert.getAllSeats().get(1);
+        favouriteSeats.add(seat1);
+        favouriteSeats.add(seat2);
+
+        // 4. user book concert tickets
+        Reservation reservation = concertBookingService.bookConcert(user, favouriteConcert, favouriteSeats);
+
+        // 5. user make final payment
+        concertBookingService.makeConcertPayment(reservation.getReservationId());
+
     }
 }
