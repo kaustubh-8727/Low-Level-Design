@@ -437,6 +437,8 @@ class ConcertBookingService {
             Reservation reservation = new Reservation(user, concert, selectedSeats);
             reservationList.add(reservation);
             return reservation;
+        } else {
+            System.out.println("seats are already booked please try other seats");
         }
         return null;
     }
@@ -476,7 +478,7 @@ class NotificationService {
     }
 }
 
-class ConcertBookingSystem {
+class Main {
     public static void main(String []args) {
 
         ConcertController concertController = new ConcertController();
@@ -533,9 +535,11 @@ class ConcertBookingSystem {
 
         // 4. user book concert tickets
         Reservation reservation = concertBookingService.bookConcert(user, favouriteConcert, favouriteSeats);
-
-        // 5. user make final payment
-        concertBookingService.makeConcertPayment(reservation.getReservationId());
+        
+        if(reservation != null) {
+            // 5. user make final payment
+            concertBookingService.makeConcertPayment(reservation.getReservationId());
+        }
 
     }
 }
