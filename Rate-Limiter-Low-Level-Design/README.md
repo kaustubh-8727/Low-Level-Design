@@ -19,7 +19,7 @@ The **Sliding Window algorithm** keeps track of request timestamps in a queue. O
 
 This ensures a real-time, rolling window of time-based request control.
 
-## 🏗️ Design Breakdown
+## Design Breakdown
 
 ### `RateLimitSlidingWindow`
 
