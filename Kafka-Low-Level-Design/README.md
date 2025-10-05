@@ -29,36 +29,6 @@ The system supports multiple producers and consumers, maintains message order wi
 
 ---
 
-## 🧠 Architecture Overview
-
-+---------------------------+
-| TopicService |
-| └── manages Topics |
-| └── each has Partitions (Queue<Message>) |
-+---------------------------+
-▲
-│
-+---------------------------+
-| ProducerService |
-| └── sends Messages to |
-| Topic partitions |
-+---------------------------+
-│
-▼
-+---------------------------+
-| NotificationService |
-| └── assigns Consumers |
-| to Partitions |
-| └── notifies Consumers |
-+---------------------------+
-│
-▼
-+---------------------------+
-| ConsumerService |
-| └── receives messages |
-+---------------------------+
-
-
 ## 🧩 Class Responsibilities
 
 | Class | Responsibility |
