@@ -3,9 +3,13 @@
 This repository contains the Low-Level Design (LLD) of a simplified **StackOverflow** system.  
 The design captures how users can create questions, submit answers, comment, view feeds, and interact through votes — with extensible and modular service architecture.
 
+> **Note:**  
+> I have not added the java class for this Low Level Design.
+> All classes and entities are defined in this README to represent the conceptual structure.
+
 ---
 
-## 🚀 Functional Requirements
+## Functional Requirements
 
 1. Users can **register/login** and create profiles.  
 2. Users can **post questions** or discussions.  
@@ -18,9 +22,9 @@ The design captures how users can create questions, submit answers, comment, vie
 
 ---
 
-## 🧩 Core Entities
+## Core Entities
 
-### 👤 User
+### User
 Represents a StackOverflow user with profile and post associations.
 
 ```java
@@ -38,7 +42,6 @@ class User {
 Contains user-specific details such as interests, badges, and reputation.
 
 ```java
-Copy code
 class Profile {
     String userId;
     String username;
