@@ -291,3 +291,15 @@ The design emphasizes **correct scheduling semantics**, **thread safety**, and *
 
 This task scheduler cleanly separates **what to run**, **when to run**, and **how to run**, while ensuring correctness, scalability, and extensibility.  
 It demonstrates strong LLD principles, proper concurrency handling, and effective use of design patterns—making it an ideal interview-ready design.
+
+## Sample Output
+
+```
+Job scheduled with ID: f8c4cf8b-4583-44c5-8c7e-7f02a6c510a1
+Task executed at 1767899572420
+Task executed at 1767899574412
+Task executed at 1767899576416
+Task executed at 1767899578416
+Task executed at 1767899580416
+Job cancelled
+```
