@@ -154,4 +154,7 @@ wrong bid by user e532f307-d353-4485-8e4c-e8cebc924025 bid must be higher than c
 [TEXT] Notification sent to User: 55bf98d8-9ca6-4dcf-8f7b-22e65c8f8010 | New Bid Placed: ₹58000 by User: 04a5f033-fec3-4fdd-86bd-012bd39e1a4e at 2026-01-27T22:02:11.902685
 [TEXT] Notification sent to User: 04a5f033-fec3-4fdd-86bd-012bd39e1a4e | New Bid Placed: ₹58000 by User: 04a5f033-fec3-4fdd-86bd-012bd39e1a4e at 2026-01-27T22:02:11.902685
 Auction Closed
+
+Winner Details:
+User: 04a5f033-fec3-4fdd-86bd-012bd39e1a4e | Amount: rs58000
 ```
