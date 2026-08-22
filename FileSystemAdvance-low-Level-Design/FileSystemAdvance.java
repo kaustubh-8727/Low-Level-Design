@@ -47,6 +47,7 @@ interface IFileSystem {
     void createFile(String name, String content);
     void cd(String path);
     String pwd();
+    String ls();
 }
 
 class FileSystem implements IFileSystem {
@@ -141,6 +142,16 @@ class FileSystem implements IFileSystem {
 
         return path.toString();
     }
+
+    public String ls() {
+        StringBuilder result = new StringBuilder();
+    
+        for (Node node : current.children.values()) {
+            result.append(node.name).append("\n");
+        }
+    
+        return result.toString();
+    }
 }
 
 public class FileSystemAdvance {
@@ -159,6 +170,7 @@ public class FileSystemAdvance {
         System.out.println(fs.pwd());
 
         fs.cd("/home/user");
+        fs.ls();
         System.out.println(fs.pwd());
     }
 }
