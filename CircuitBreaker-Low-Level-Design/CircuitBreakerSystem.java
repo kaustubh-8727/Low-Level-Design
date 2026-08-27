@@ -466,8 +466,6 @@ class CircuitBreakerSystem {
         } catch (Exception e) {
             System.out.println("Request failed: " + e.getMessage());
         }
-
-        System.out.println("---------------------------");
     }
 
     private static void sleep(long millis) {
